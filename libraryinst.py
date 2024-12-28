@@ -8,6 +8,7 @@ def install_libraries():
         "psycopg2",
         "alembic",
         "uvicorn"
+        "paramiko "
     ]
     for library in libraries:
         subprocess.check_call([sys.executable, "-m", "pip", "install", library])
