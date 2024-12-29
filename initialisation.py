@@ -10,7 +10,7 @@ ssh_password = "BVn6i1U3fM5Vp"
 db_host = "localhost"
 db_port = 5432
 db_user = "postgres"
-db_password = "password"
+db_password = "smartbOb"
 new_db_name = "auto_workshop"
 new_db_owner = "workshop_owner"
 
