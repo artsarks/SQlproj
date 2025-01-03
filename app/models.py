@@ -6,6 +6,7 @@ Base = declarative_base()
 
 class Car(Base):
     __tablename__ = "cars"
+    __table_args__ = {'schema': 'public'}
     id = Column(Integer, primary_key=True, autoincrement=True)
     number = Column(String, unique=True, nullable=False)
     brand = Column(String, nullable=False)
@@ -15,9 +16,10 @@ class Car(Base):
 
 class Order(Base):
     __tablename__ = "orders"
+    __table_args__ = {'schema': 'public'}
     id = Column(Integer, primary_key=True, autoincrement=True)
-    car_id = Column(Integer, ForeignKey("cars.id"), nullable=False)
-    mechanic_id = Column(Integer, ForeignKey("mechanics.id"), nullable=False)
+    car_id = Column(Integer, ForeignKey("public.cars.id"), nullable=False)  # Указание схемы в ForeignKey
+    mechanic_id = Column(Integer, ForeignKey("public.mechanics.id"), nullable=False)  # Указание схемы
     issue_date = Column(Date, nullable=False)
     work_type = Column(String, nullable=False)
     cost = Column(Float, nullable=False)
@@ -28,6 +30,7 @@ class Order(Base):
 
 class Mechanic(Base):
     __tablename__ = "mechanics"
+    __table_args__ = {'schema': 'public'}
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String, nullable=False)
     experience = Column(Integer, nullable=False)

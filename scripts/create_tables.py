@@ -1,9 +1,4 @@
-from app.database import engine
-from app.models import Base
+from sqlalchemy import create_engine
 
-def create_tables():
-    Base.metadata.create_all(bind=engine)
-    print("Tables created successfully.")
-
-if __name__ == "__main__":
-    create_tables()
+DATABASE_URL = "postgresql+psycopg2://postgres:smart@localhost/ProjectAS_DB"  # Заменен пользователь
+engine = create_engine(DATABASE_URL)
