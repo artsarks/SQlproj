@@ -80,3 +80,37 @@ def delete_car(car_id):
 
 if __name__ == '__main__':
     app.run(debug=True)
+
+
+"""
+~ curl -X POST http://127.0.0.1:5000/cars -H "Content-Type: application/json" -d '{
+  "number": "A123BC",
+  "brand": "Toyota",
+  "year": 2015,
+  "owner_name": "John Doe"
+}'
+{
+  "message": "Car created successfully"
+}
+➜  ~ curl http://127.0.0.1:5000/cars
+
+[
+  {
+    "brand": "Toyota",
+    "id": 1,
+    "number": "A123BC",
+    "owner_name": "John Doe",
+    "year": 2015
+  }
+]
+➜  ~ curl http://127.0.0.1:5000/cars/1
+
+{
+  "brand": "Toyota",
+  "id": 1,
+  "number": "A123BC",
+  "owner_name": "John Doe",
+  "year": 2015
+}
+➜  ~ 
+"""
