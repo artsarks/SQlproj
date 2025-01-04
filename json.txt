@@ -1,0 +1,103 @@
+                                      Table "public.orders"
+      Column      |       Type        | Collation | Nullable |              Default               
+------------------+-------------------+-----------+----------+------------------------------------
+ id               | integer           |           | not null | nextval('orders_id_seq'::regclass)
+ car_id           | integer           |           | not null | 
+ mechanic_id      | integer           |           | not null | 
+ issue_date       | date              |           | not null | 
+ work_type        | character varying |           | not null | 
+ cost             | double precision  |           | not null | 
+ planned_end_date | date              |           | not null | 
+ actual_end_date  | date              |           |          | 
+ details          | jsonb             |           | not null | '{}'::jsonb
+Indexes:
+    "orders_pkey" PRIMARY KEY, btree (id)
+    "idx_order_details_trgm" gin (details jsonb_path_ops)
+Foreign-key constraints:
+    "orders_car_id_fkey" FOREIGN KEY (car_id) REFERENCES cars(id)
+    "orders_mechanic_id_fkey" FOREIGN KEY (mechanic_id) REFERENCES mechanics(id)
+
+~
+~
+~
+~
+OUTPUT
+
+~ curl -X GET "http://localhost:5002/orders/search?q=%7B%22priority%22%3A%20%22high%22%7D"
+
+[
+  {
+    "car_id": 1,
+    "cost": 500.0,
+    "details": {
+      "description": "Replaced engine parts",
+      "priority": "high"
+    },
+    "id": 21,
+    "mechanic_id": 1
+  },
+  {
+    "car_id": 1,
+    "cost": 500.0,
+    "details": {
+      "description": "Engine replacement",
+      "priority": "high"
+    },
+    "id": 22,
+    "mechanic_id": 1
+  }
+]
+➜  ~ 
+
+
+Indexes
+
+ProjectAS_DB=# CREATE INDEX idx_order_details_gin
+ON public.orders
+USING gin (details);
+CREATE INDEX
+ProjectAS_DB=# \d orders
+ProjectAS_DB=# \d orders
+                                      Table "public.orders"
+      Column      |       Type        | Collation | Nullable |              Default               
+------------------+-------------------+-----------+----------+------------------------------------
+ id               | integer           |           | not null | nextval('orders_id_seq'::regclass)
+ car_id           | integer           |           | not null | 
+ mechanic_id      | integer           |           | not null | 
+ issue_date       | date              |           | not null | 
+ work_type        | character varying |           | not null | 
+ cost             | double precision  |           | not null | 
+ planned_end_date | date              |           | not null | 
+ actual_end_date  | date              |           |          | 
+ details          | jsonb             |           | not null | '{}'::jsonb
+Indexes:
+    "orders_pkey" PRIMARY KEY, btree (id)
+    "idx_order_details_gin" gin (details)
+    "idx_order_details_trgm" gin (details jsonb_path_ops)
+Foreign-key constraints:
+    "orders_car_id_fkey" FOREIGN KEY (car_id) REFERENCES cars(id)
+    "orders_mechanic_id_fkey" FOREIGN KEY (mechanic_id) REFERENCES mechanics(id)
+
+ProjectAS_DB=# 
+
+FULL TEXT SEARCH
+
+➜  ~ curl -X GET "http://localhost:5002/orders/search_fulltext?q=engine"
+
+[
+  {
+    "actual_end_date": null,
+    "car_id": 1,
+    "cost": 500.0,
+    "details": {
+      "description": "Replaced engine parts",
+      "priority": "high"
+    },
+    "id": 21,
+    "issue_date": "Wed, 01 Jan 2025 00:00:00 GMT",
+    "mechanic_id": 1,
+    "planned_end_date": "Fri, 10 Jan 2025 00:00:00 GMT",
+    "work_type": "Engine Repair"
+  }
+]
+➜  ~ 
