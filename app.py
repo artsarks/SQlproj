@@ -8,6 +8,7 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
+# Модели базы данных
 class Car(db.Model):
     __tablename__ = "cars"
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -16,25 +17,36 @@ class Car(db.Model):
     year = db.Column(db.Integer, nullable=False)
     owner_name = db.Column(db.String, nullable=False)
 
+class Mechanic(db.Model):
+    __tablename__ = "mechanics"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    name = db.Column(db.String, nullable=False)
+    experience = db.Column(db.Integer, nullable=False)
+    rank = db.Column(db.Integer, nullable=False)
+
+class Order(db.Model):
+    __tablename__ = "orders"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    car_id = db.Column(db.Integer, db.ForeignKey('cars.id'), nullable=False)
+    mechanic_id = db.Column(db.Integer, db.ForeignKey('mechanics.id'), nullable=False)
+    date = db.Column(db.Date, nullable=False)
+    service = db.Column(db.String, nullable=False)
+    cost = db.Column(db.Float, nullable=False)
+    car = db.relationship('Car', backref='orders')
+    mechanic = db.relationship('Mechanic', backref='orders')
+
 with app.app_context():
     db.create_all()
 
-@app.route('/cars', methods=['POST'])
-def create_car():
-    data = request.get_json()
-    new_car = Car(
-        number=data['number'],
-        brand=data['brand'],
-        year=data['year'],
-        owner_name=data['owner_name']
-    )
-    db.session.add(new_car)
-    db.session.commit()
-    return jsonify({"message": "Car created successfully"}), 201
-
-@app.route('/cars', methods=['GET'])
-def get_cars():
-    cars = Car.query.all()
+# SELECT ... WHERE (с несколькими условиями)
+@app.route('/cars/filter', methods=['GET'])
+def filter_cars():
+    filters = []
+    if 'brand' in request.args:
+        filters.append(Car.brand == request.args['brand'])
+    if 'year' in request.args:
+        filters.append(Car.year == request.args['year'])
+    cars = Car.query.filter(*filters).all()
     return jsonify([{
         "id": car.id,
         "number": car.number,
@@ -43,74 +55,68 @@ def get_cars():
         "owner_name": car.owner_name
     } for car in cars])
 
-@app.route('/cars/<int:car_id>', methods=['GET'])
-def get_car(car_id):
-    car = Car.query.get(car_id)
+# JOIN (связь машины с таблицей заказов)
+@app.route('/cars_with_orders', methods=['GET'])
+def cars_with_orders():
+    records = db.session.query(Car, Order).join(Order, Car.id == Order.car_id).all()
+    result = []
+    for car, order in records:
+        result.append({
+            "car": {
+                "id": car.id,
+                "number": car.number,
+                "brand": car.brand,
+                "year": car.year,
+                "owner_name": car.owner_name
+            },
+            "order": {
+                "id": order.id,
+                "car_id": order.car_id,
+                "mechanic_id": order.mechanic_id,
+                "issue_date": order.issue_date,
+                "work_type": order.work_type,
+                "cost": order.cost,
+                "planned_end_date": order.planned_end_date,
+                "actual_end_date": order.actual_end_date
+            }
+        })
+    return jsonify(result)
+
+
+# UPDATE с нетривиальным условием
+@app.route('/cars/update_year', methods=['POST'])
+def update_car_year():
+    data = request.get_json()
+    car_id = data.get('car_id')
+    new_year = data.get('new_year')
+    car = Car.query.filter(Car.id == car_id, Car.year < new_year).first()
     if not car:
-        return jsonify({"message": "Car not found"}), 404
-    return jsonify({
+        return jsonify({"message": "Car not found or condition not met"}), 404
+    car.year = new_year
+    db.session.commit()
+    return jsonify({"message": "Car year updated successfully"})
+
+# GROUP BY (группировка машин по марке)
+@app.route('/cars/group_by_brand', methods=['GET'])
+def group_by_brand():
+    records = db.session.query(Car.brand, db.func.count(Car.id)).group_by(Car.brand).all()
+    result = {record[0]: record[1] for record in records}
+    return jsonify(result)
+
+# Сортировка по полям (например, по году)
+@app.route('/cars/sort', methods=['GET'])
+def sort_cars():
+    sort_by = request.args.get('field')
+    if sort_by not in ['number', 'brand', 'year', 'owner_name']:
+        return jsonify({"message": "Invalid field for sorting"}), 400
+    cars = Car.query.order_by(getattr(Car, sort_by)).all()
+    return jsonify([{
         "id": car.id,
         "number": car.number,
         "brand": car.brand,
         "year": car.year,
         "owner_name": car.owner_name
-    })
-
-@app.route('/cars/<int:car_id>', methods=['PUT'])
-def update_car(car_id):
-    data = request.get_json()
-    car = Car.query.get(car_id)
-    if not car:
-        return jsonify({"message": "Car not found"}), 404
-    car.number = data.get('number', car.number)
-    car.brand = data.get('brand', car.brand)
-    car.year = data.get('year', car.year)
-    car.owner_name = data.get('owner_name', car.owner_name)
-    db.session.commit()
-    return jsonify({"message": "Car updated successfully"})
-
-@app.route('/cars/<int:car_id>', methods=['DELETE'])
-def delete_car(car_id):
-    car = Car.query.get(car_id)
-    if not car:
-        return jsonify({"message": "Car not found"}), 404
-    db.session.delete(car)
-    db.session.commit()
-    return jsonify({"message": "Car deleted successfully"})
+    } for car in cars])
 
 if __name__ == '__main__':
-    app.run(debug=True)
-
-
-"""
-~ curl -X POST http://127.0.0.1:5000/cars -H "Content-Type: application/json" -d '{
-  "number": "A123BC",
-  "brand": "Toyota",
-  "year": 2015,
-  "owner_name": "John Doe"
-}'
-{
-  "message": "Car created successfully"
-}
-➜  ~ curl http://127.0.0.1:5000/cars
-
-[
-  {
-    "brand": "Toyota",
-    "id": 1,
-    "number": "A123BC",
-    "owner_name": "John Doe",
-    "year": 2015
-  }
-]
-➜  ~ curl http://127.0.0.1:5000/cars/1
-
-{
-  "brand": "Toyota",
-  "id": 1,
-  "number": "A123BC",
-  "owner_name": "John Doe",
-  "year": 2015
-}
-➜  ~ 
-"""
+    app.run(debug=True, port=5002)
