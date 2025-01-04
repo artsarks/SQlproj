@@ -1,0 +1,22 @@
+~ /home/arthur/Desktop/Github/myapp/venv/bin/python /home/arthur/Desktop/Github/myapp/scripts/populate_db.py
+
+Added: {'number': 'XCC-279', 'brand': 'Williams Ltd', 'year': '1971', 'owner_name': 'Tracy Hoffman'}
+Added: {'number': 'ZPM 483', 'brand': 'Mercer, Lin and Fowler', 'year': '1998', 'owner_name': 'Jodi Phillips'}
+Added: {'number': '78-UQ64', 'brand': 'Wilson, Pham and Newton', 'year': '2007', 'owner_name': 'Laurie Benson'}
+Added: {'number': '9M 42033', 'brand': 'Pope-Smith', 'year': '2016', 'owner_name': 'Kyle Johnson'}
+Added: {'number': '800 RQD', 'brand': 'Baker, Hoffman and Hernandez', 'year': '1975', 'owner_name': 'Gavin Gilbert'}
+Added: {'number': '84T M74', 'brand': 'King PLC', 'year': '1989', 'owner_name': 'Kristina Sanchez'}
+
+
+
+in terminal
+127.0.0.1 - - [04/Jan/2025 15:54:24] "POST /cars HTTP/1.1" 201 -
+127.0.0.1 - - [04/Jan/2025 15:54:24] "POST /cars HTTP/1.1" 201 -
+127.0.0.1 - - [04/Jan/2025 15:54:24] "POST /cars HTTP/1.1" 201 -
+127.0.0.1 - - [04/Jan/2025 15:54:24] "POST /cars HTTP/1.1" 201 -
+127.0.0.1 - - [04/Jan/2025 15:54:24] "POST /cars HTTP/1.1" 201 -
+127.0.0.1 - - [04/Jan/2025 15:54:24] "POST /cars HTTP/1.1" 201 -
+127.0.0.1 - - [04/Jan/2025 15:54:24] "POST /cars HTTP/1.1" 201 -
+127.0.0.1 - - [04/Jan/2025 15:54:24] "POST /cars HTTP/1.1" 201 -
+127.0.0.1 - - [04/Jan/2025 15:54:24] "POST /cars HTTP/1.1" 201 -
+127.0.0.1 - - [04/Jan/2025 15:54:24] "POST /cars HTTP/1.1" 201 -
