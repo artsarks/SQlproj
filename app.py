@@ -37,17 +37,17 @@ class Order(db.Model):
     issue_date = db.Column(db.Date, nullable=False)
     work_type = db.Column(db.String, nullable=False)
     cost = db.Column(db.Float, nullable=False)
-    details = db.Column(db.JSON, nullable=True)  # Поле для хранения JSON
+    details = db.Column(db.JSON, nullable=True)
     car = db.relationship('Car', backref='orders')
     mechanic = db.relationship('Mechanic', backref='orders')
 
 
-# Создание всех таблиц
+
 with app.app_context():
     db.create_all()
 
 
-# SELECT ... WHERE (с несколькими условиями)
+# SELECT ... WHERE 
 @app.route('/cars/filter', methods=['GET'])
 def filter_cars():
     filters = []
@@ -65,7 +65,7 @@ def filter_cars():
     } for car in cars])
 
 
-# JOIN (связь машины с таблицей заказов)
+# JOIN 
 @app.route('/cars_with_orders', methods=['GET'])
 def cars_with_orders():
     records = db.session.query(Car, Order).join(Order, Car.id == Order.car_id).all()
@@ -92,7 +92,7 @@ def cars_with_orders():
     return jsonify(result)
 
 
-# UPDATE с нетривиальным условием
+# UPDATE 
 @app.route('/cars/update_year', methods=['POST'])
 def update_car_year():
     data = request.get_json()
@@ -106,7 +106,7 @@ def update_car_year():
     return jsonify({"message": "Car year updated successfully"})
 
 
-# GROUP BY (группировка машин по марке)
+# GROUP BY 
 @app.route('/cars/group_by_brand', methods=['GET'])
 def group_by_brand():
     records = db.session.query(Car.brand, db.func.count(Car.id)).group_by(Car.brand).all()
@@ -114,7 +114,7 @@ def group_by_brand():
     return jsonify(result)
 
 
-# Сортировка по полям (например, по году)
+# Сортировка по полям 
 @app.route('/cars/sort', methods=['GET'])
 def sort_cars():
     sort_by = request.args.get('field')
@@ -130,7 +130,7 @@ def sort_cars():
     } for car in cars])
 
 
-# Поиск в JSONB
+# JSONB
 @app.route('/orders/search', methods=['GET'])
 def search_orders():
     query = request.args.get('q')  # Получаем поисковый запрос

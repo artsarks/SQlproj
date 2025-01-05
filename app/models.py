@@ -27,7 +27,7 @@ class Order(Base):
     cost = Column(Float, nullable=False)
     planned_end_date = Column(Date, nullable=False)
     actual_end_date = Column(Date, nullable=True)
-    details = Column(JSONB, nullable=False)  # Добавлено JSON-поле
+    details = Column(JSONB, nullable=False)  
     car = relationship("Car", back_populates="orders")
     mechanic = relationship("Mechanic", back_populates="orders")
 
