@@ -34,8 +34,8 @@ class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     car_id = db.Column(db.Integer, db.ForeignKey('cars.id'), nullable=False)
     mechanic_id = db.Column(db.Integer, db.ForeignKey('mechanics.id'), nullable=False)
-    date = db.Column(db.Date, nullable=False)
-    service = db.Column(db.String, nullable=False)
+    issue_date = db.Column(db.Date, nullable=False)
+    work_type = db.Column(db.String, nullable=False)
     cost = db.Column(db.Float, nullable=False)
     details = db.Column(db.JSON, nullable=True)  # Поле для хранения JSON
     car = db.relationship('Car', backref='orders')
@@ -83,8 +83,8 @@ def cars_with_orders():
                 "id": order.id,
                 "car_id": order.car_id,
                 "mechanic_id": order.mechanic_id,
-                "date": order.date,
-                "service": order.service,
+                "issue_date": order.issue_date,
+                "work_type": order.work_type,
                 "cost": order.cost,
                 "details": order.details
             }
@@ -182,6 +182,38 @@ def search_orders_fulltext():
         "actual_end_date": row.actual_end_date,
         "details": row.details
     } for row in results])
+
+
+# Получение всех заказов определенного механика (ORM)
+@app.route('/orders/by_mechanic/<int:mechanic_id>', methods=['GET'])
+def get_orders_by_mechanic(mechanic_id):
+    orders = Order.query.filter_by(mechanic_id=mechanic_id).all()
+    return jsonify([{
+        "id": order.id,
+        "car_id": order.car_id,
+        "mechanic_id": order.mechanic_id,
+        "issue_date": order.issue_date,
+        "work_type": order.work_type,
+        "cost": order.cost,
+        "details": order.details
+    } for order in orders])
+
+
+# Обновление владельца машины (ORM)
+@app.route('/cars/update', methods=['POST'])
+def update_car_owner():
+    data = request.get_json()
+    car_id = data.get('car_id')
+    new_owner = data.get('new_owner')
+
+    car = Car.query.filter_by(id=car_id).first()
+    if not car:
+        return jsonify({"message": "Car not found"}), 404
+
+    car.owner_name = new_owner
+    db.session.commit()
+    return jsonify({"message": "Owner updated successfully", "car_id": car_id, "new_owner": new_owner})
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5002)
